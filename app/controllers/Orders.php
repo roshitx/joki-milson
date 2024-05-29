@@ -3,8 +3,19 @@
     class Orders extends Controller
     {
         // menu models
-        public function index()
+        public function index($uniqueId = null)
         {
+            if ($uniqueId !== null) {
+                $tableData = $this->model('Table_model')->getTableByUuId($uniqueId);
+
+                $data['nomor_meja'] = $tableData['nomor_meja'];
+                $data['uuid_table'] = $tableData['uuid'];
+                // echo "<pre>";
+                // var_dump($nomorMeja);
+                // echo "</pre>";
+                // die;
+            }
+
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $rating = $_POST['rating'];
                 $review = $_POST['review'];
@@ -12,12 +23,14 @@
                 $ordersModel->addReview($rating, $review);
             }
 
+            // Get all menus
             $data['judul'] = 'Milson Coffee | Semua Menu';
             $data['menus'] = $this->model('Orders_model')->getAllMenus();
 
+            // Apply discount logic
             foreach ($data['menus'] as &$menu) {
                 if (
-                    isset($menu['discounted_price'])  &&
+                    isset($menu['discounted_price']) &&
                     strtotime(date('Y-m-d')) >= strtotime($menu['start_date']) &&
                     strtotime(date('Y-m-d')) <= strtotime($menu['end_date'])
                 ) {
@@ -27,6 +40,7 @@
                 }
             }
 
+            // Load views
             $this->view('templates/header', $data);
             $this->view('home/menus/index', $data);
             $this->view('templates/footer');
@@ -78,6 +92,7 @@
                 'order_id' => $_POST['order_id'],
                 'customer_name' => $_POST['customer_name'],
                 'table_number' => $_POST['table_number'],
+                'uuid_table' => $_POST['uuid_table'],
                 'grand_total' => $_POST['grand_total'],
             ];
 

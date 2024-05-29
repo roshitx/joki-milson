@@ -1,5 +1,4 @@
 <?php
-
 class Table extends Controller
 {
 
@@ -19,41 +18,29 @@ class Table extends Controller
         echo json_encode(['nomor_meja' => $nextId]);
     }
 
-    public function detail($order_id)
+    public function add()
     {
-        $data['judul'] = 'Milson Coffee | Detail Orderan';
-        $orderDetail = $this->model('Orders_model')->getOrderDetail($order_id);
-        $detailMenu = $this->model('Orders_model')->getMenuDetail($order_id);
-        $data['order_detail'] = $orderDetail;
-        $data['detail_menu'] = $detailMenu;
-
-        foreach ($data['detail_menu'] as &$menu) {
-            if (
-                isset($menu['discounted_price']) &&
-                strtotime(date('Y-m-d')) >= strtotime($menu['start_date']) &&
-                strtotime(date('Y-m-d')) <= strtotime($menu['end_date'])
-            ) {
-                $menu['show_discount'] = true;
-            } else {
-                $menu['show_discount'] = false;
-            }
-        }
-
-        $this->view('templates/dash_header', $data);
-        $this->view('dashboard/transaksi/detail', $data);
-        $this->view('templates/dash_footer');
-    }
-
-    public function store()
-    {
-        if ($this->model('Transaksi_model')->addTransaksi($_POST) > 0) {
+        if ($this->model('Table_model')->storeMeja($_POST) > 0) {
             Flasher::setFlash('Success', 'Pesanan berhasil diselesaikan', 'success');
             $order_id = $_POST['order_id'];
-            header('Location:' . BASE_URL . '/transaksi/invoice/' . $order_id);
+            header('Location:' . BASE_URL . '/table');
             exit;
         } else {
             Flasher::setFlash('Fail', 'Gagal menyelesaikan pesanan', 'error');
-            header('Location:' . BASE_URL . '/transaksi');
+            header('Location:' . BASE_URL . '/table');
+            exit;
+        }
+    }
+
+    public function delete($id)
+    {
+        if ($this->model('Table_model')->deleteTable($id) > 0) {
+            Flasher::setFlash('Success', 'Successfully delete table', 'success');
+            header('Location:' . BASE_URL . '/table');
+            exit;
+        } else {
+            Flasher::setFlash('Fail', 'Failed delete table', 'error');
+            header('Location:' . BASE_URL . '/table');
             exit;
         }
     }

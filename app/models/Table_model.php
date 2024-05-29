@@ -1,5 +1,5 @@
 <?php
-
+include __DIR__ . '../../../public/vendor/phpqrcode/qrlib.php';
 class Table_model
 {
     private $table = "table";
@@ -19,81 +19,70 @@ class Table_model
 
     public function getLastId()
     {
-        $this->db->query("SELECT MAX(id) AS last_id FROM `" . $this->table . "`");
+        $this->db->query("SELECT MAX(nomor_meja) AS last_id FROM `" . $this->table . "`");
         $this->db->execute();
         return $this->db->single();
     }
-    public function addTable($data)
+    public function storeMeja($data)
     {
-        $transactionId = 'TRN-' . substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 7);
+        $uniqueId = $data['uuid'];
+        $QRContent = BASE_URL . '/orders/' . $uniqueId;
 
-        $query = "INSERT INTO transactions (transaction_id, order_id, payment_method, total_amount, cashier_name) VALUES (:transaction_id, :order_id, :payment_method, :total_amount, :cashier_name)";
+        if ($uniqueId != null) {
+            $storage = "qrcode/";
+
+            if (!file_exists($storage)) {
+                mkdir($storage);
+            }
+
+            $qrFileName = "tableQr_" . $uniqueId . ".png";
+            QRcode::png($QRContent, $storage . $qrFileName, QR_ECLEVEL_L, 3, 2);
+        }
+
+        $query = "INSERT INTO `" . $this->table . "` (uuid, nomor_meja, qr) VALUES (:uuid, :nomor_meja, :qr)";
         $this->db->query($query);
 
-        $this->db->bind(':transaction_id', $transactionId);
-        $this->db->bind(':order_id', $data['order_id']);
-        $this->db->bind(':payment_method', $data['payment_method']);
-        $this->db->bind(':total_amount', $data['total_amount']);
-        $this->db->bind(':cashier_name', $data['cashier_name']);
+        $this->db->bind(':uuid', $data['uuid']);
+        $this->db->bind(':nomor_meja', $data['nomor_meja']);
+        $this->db->bind(':qr', $qrFileName);
 
-        $this->db->execute();
-        
-        $this->db->query("UPDATE orders SET status = :status WHERE order_id = :order_id");
-        $this->db->bind(':order_id', $data['order_id']);
         $this->db->execute();
 
         return $this->db->rowCount();
     }
 
-    public function getDataById($orderId)
+    public function getTableById($id)
     {
-        $query = "SELECT * FROM " . $this->table . " WHERE order_id = :order_id";
-        $this->db->query($query);
-        $this->db->bind(':order_id', $orderId);
-        $this->db->execute();
+        $this->db->query("SELECT * FROM `" . $this->table . "` WHERE id=:id");
+        $this->db->bind('id', $id);
         return $this->db->single();
     }
 
-    public function getMonthlyProfit()
+    public function getTableByUuid($uniqueId)
     {
-        // Ambil data pendapatan yang ada dari database
-        $query = "SELECT MONTH(transaction_date) AS bulan, SUM(total_amount) AS total_pendapatan FROM transactions
-                  WHERE YEAR(transaction_date) = YEAR(CURRENT_DATE())
-                  GROUP BY bulan";
-
-        $this->db->query($query);
-        $this->db->execute();
-
-        return $this->db->resultSet();
+        $this->db->query("SELECT * FROM `" . $this->table . "` WHERE uuid = :uuid");
+        $this->db->bind(':uuid', $uniqueId);
+        return $this->db->single();
     }
 
-    public function getMonthlySoldItemByCategory()
+    public function deleteTable($id)
     {
-        $query = "
-        SELECT 
-            m.kategori,
-            SUM(oi.quantity) AS total_penjualan
-        FROM orders_item oi
-        JOIN menus m ON oi.menu_id = m.menu_id
-        GROUP BY m.kategori
-    ";
+        $tableInfo = $this->getTableById($id);
 
-        $this->db->query($query);
-        $this->db->execute();
-        $result = $this->db->resultSet();
+        if ($tableInfo) {
+            $imagePath = 'qrcode/' . $tableInfo['qr'];
+            if (file_exists($imagePath)) {
+                unlink($imagePath); // delete  qr code
+            }
 
-        $pieChartData = [];
+            $query = "DELETE FROM `" . $this->table . "` WHERE id = :id";
+            $this->db->query($query);
+            $this->db->bind('id', $id);
+            $this->db->execute();
 
-        foreach ($result as $row) {
-            $kategori = $row['kategori'];
-            $totalPenjualan = $row['total_penjualan'];
-
-            $pieChartData[] = [
-                'kategori' => $kategori,
-                'total_penjualan' => $totalPenjualan,
-            ];
+            return $this->db->rowCount();
         }
 
-        return $pieChartData;
+        return 0;
     }
 }

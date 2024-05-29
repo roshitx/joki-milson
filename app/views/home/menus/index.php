@@ -133,10 +133,13 @@ if (isset($_SESSION['cart_item_count'])) {
                             <input type="hidden" id="grandTotalInput">
                             <div class="row">
                                 <div class="col-6">
-                                    <input type="text" class="form-control" placeholder="Nama Customer" id="customer_name" name="customer_name">
+                                    <label for="customer_name">Customer Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" placeholder="Nama Customer" id="customer_name" name="customer_name" required>
                                 </div>
                                 <div class="col-6">
-                                    <input type="number" class="form-control" placeholder="Nomor Meja" id="table_number" name="table_number">
+                                    <label for="table_number">Table Number</label>
+                                    <input type="number" class="form-control" placeholder="Nomor Meja" id="table_number" name="table_number" value="<?= $data['nomor_meja'] ?>" readonly>
+                                    <input type="number" class="form-control" id="uuid_table" name="uuid_table" value="<?= $data['uuid_table'] ?>" hidden>
                                 </div>
                             </div>
                     </div>
@@ -190,10 +193,11 @@ if (isset($_SESSION['cart_item_count'])) {
     $(document).ready(function() {
         $('#filterByKategori').change(function() {
             const selectedCategory = $(this).val();
+            const tableNumber = $('#table_number').val();
 
             if (selectedCategory == 'all') {
                 // Jika "Semua" dipilih, arahkan ke semua menu
-                window.location.href = 'http://localhost/milson-coffee/public/orders/';
+                window.location.href = 'http://localhost/milson-coffee/public/orders/' + tableNumber;
             } else {
                 $.ajax({
                     url: 'http://localhost/milson-coffee/public/orders/menuByCategory/' +
@@ -327,6 +331,7 @@ if (isset($_SESSION['cart_item_count'])) {
                 const order_id = generateOrderId();
                 const customer_name = $('#customer_name').val();
                 const table_number = $('#table_number').val();
+                const uuid_table = $('#uuid_table').val();
                 const grandTotal = $('#grandTotalInput').val();
 
                 // Data yang akan dikirimkan
@@ -334,6 +339,7 @@ if (isset($_SESSION['cart_item_count'])) {
                     order_id: order_id,
                     customer_name: customer_name,
                     table_number: table_number,
+                    uuid_table: uuid_table,
                     grand_total: grandTotal,
                     menuIds: menuIds,
                     quantities: qtyData,
@@ -351,6 +357,7 @@ if (isset($_SESSION['cart_item_count'])) {
                         updateCartTable2();
                         $('#customer_name').val('');
                         $('#table_number').val('');
+                        $('#uuid_table').val('');
                         updateCartTable2();
                         Swal.fire({
                             title: "Berhasil!",

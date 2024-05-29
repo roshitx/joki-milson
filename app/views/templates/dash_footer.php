@@ -179,6 +179,27 @@
             });
         });
 
+        $('.deleteButtonTable').click(function () {
+            let tableId = $(this).data('id');
+            console.log(tableId);
+            let deleteTableUrl = '<?= BASE_URL ?>/table/delete/' + tableId;
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You will not be able to recover this!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, cancel',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // If confirmed, redirect to the delete URL
+                    window.location.href = deleteTableUrl;
+                }
+            });
+        });
+
         document.getElementById('logoutButton').addEventListener('click', function () {
             window.location.href = '<?= BASE_URL ?>/logout';
         });

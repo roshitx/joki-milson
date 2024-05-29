@@ -67,6 +67,7 @@ require __DIR__ . '/../../templates/sidebar.php';
                                     <div class="modal-body">
                                         <form action="<?= BASE_URL; ?>/table/add" method="POST">
                                             <input type="hidden" name="id" id="id">
+                                            <input type="text" hidden name="uuid" id="uuid">
 
                                             <div class="form-group">
                                                 <label for="nomor_meja">Nomor Meja</label>
@@ -92,26 +93,22 @@ require __DIR__ . '/../../templates/sidebar.php';
                             <table class="table" id="tableMeja">
                                 <thead>
                                     <tr>
-                                        <th scope="col" width="1%">#</th>
-                                        <th scope="col">Nomor Meja</th>
-                                        <th scope="col">QR Code</th>
+                                        <th scope="col" width="1%" class="text-center">#</th>
+                                        <th scope="col" class="text-center">Nomor Meja</th>
+                                        <th scope="col" class="text-center">QR Code</th>
                                         <th scope="col" width="10%"><i class="fa-solid fa-gear"></i></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php $iteration = 1; ?>
                                     <?php foreach($data['table'] as $table): ?>
-
                                     <tr>
-                                        <th scope="row"><?= $iteration ?></th>
-                                        <td><?= $table['nomor_meja'] ?></td>
-                                        <td><?= $table['qr'] ?></td>
+                                        <th scope="row" class="text-center"><?= $iteration ?></th>
+                                        <td class="text-center"><?= $table['nomor_meja'] ?></td>
+                                        <td class="text-center">
+                                            <img src="<?= BASE_URL . "/qrcode/" . $table['qr'] ?>" alt="<?= $table['qr'] ?>" width="100">
+                                        </td>
                                         <td>
-                                            <button class="btn btn-warning btn-circle btn-sm editButtonTable"
-                                                data-toggle="modal" data-target="#addTable"
-                                                data-id="<?= $table['id'] ?>">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
                                             <button class="btn btn-danger btn-circle btn-sm deleteButtonTable"
                                                 data-id="<?= $table['id'] ?>">
                                                 <i class="fas fa-trash"></i>
@@ -144,10 +141,15 @@ require __DIR__ . '/../../templates/sidebar.php';
 <!-- End of Content Wrapper -->
 <script>
     $(document).ready(function () {
-        $('#tableMeja').DataTable();
+        $('#tableMeja').DataTable({
+            pageLength: 5,
+        });
     });
 
     $('.addButtonTable').on('click', function () {
+        var uuid = generateUUID();
+        $('#uuid').val(uuid);
+
         $.ajax({
             url: '<?= BASE_URL; ?>/table/getNomorMeja',
             method: 'GET',
@@ -168,6 +170,13 @@ require __DIR__ . '/../../templates/sidebar.php';
         var ribuan = reverse.match(/\d{1,3}/g);
         var hasil = ribuan.join('.').split('').reverse().join('');
         return hasil;
+    }
+
+    function generateUUID() {
+        return 'xxxxxxxx'.replace(/[x]/g, function () {
+            var r = Math.random() * 16 | 0, v = r.toString(16);
+            return v;
+        });
     }
 
     <?php Flasher::flash(); ?>

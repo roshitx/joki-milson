@@ -21,9 +21,9 @@ class Cart extends Controller
 
     public function add()
     {
+        $referer = $_SERVER['HTTP_REFERER'];
         $menu_id = $_POST['menu_id'];
         $menuItem = $this->model('Menu_model')->getMenuById($menu_id);
-        var_dump($menuItem);
     
         // Cari diskon
         $discount = $this->model('Discount_model')->getDiscountByMenuId($menu_id);
@@ -36,15 +36,13 @@ class Cart extends Controller
             $discounted_price = $menuItem['price'];
         }
     
-        // Tambah item ke cart
         $this->model('Cart_model')->addItemInCart($menu_id, $discounted_price);
     
-        // Perbarui jumlah item di cart
         $cartItemCount = $this->model('Cart_model')->getCartItemCount();
         $_SESSION['cart_item_count'] = $cartItemCount;
     
         // Redirect ke halaman orders
-        header('Location:' . BASE_URL . '/orders');
+        header('Location:' . ($referer ? $referer : BASE_URL . '/orders'));
         exit;
     }
 
