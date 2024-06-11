@@ -55,13 +55,11 @@ require __DIR__ . '/../../templates/sidebar.php';
                         <div class="table-responsive">
                             <table class="table" id="reportTable">
                                 <thead>
-
                                     <tr>
                                         <th scope="col" class="text-center">#</th>
                                         <th scope="col" class="text-center">Tanggal</th>
                                         <th scope="col" class="text-center">Total Omset Penjualan</th>
                                     </tr>
-
                                 </thead>
                                 <tbody>
                                     <?php 
@@ -76,16 +74,19 @@ require __DIR__ . '/../../templates/sidebar.php';
                                         </tr>
 
                                         <?php
-                                            $grandTotal += $item['total_omset'];  
+                                            $grandTotal += $item['total_omset'];
                                         ?>
                                         
                                         <?php $iteration++ ?>
                                     <?php endforeach; ?>
-                                    <tr>
-                                        <td class="text-right" colspan="2"><b>Grand Total :</b></td>
-                                        <td class="text-center">Rp <?= number_format($grandTotal, 3, '.', ',')?></td> 
-                                    </tr>
                                 </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td></td>
+                                        <td class="text-center"><b>Grand Total :</b></td>
+                                        <td class="text-center">Rp <?= number_format($grandTotal, 3, '.', ',') ?></td> 
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
                     </div>
@@ -114,8 +115,19 @@ require __DIR__ . '/../../templates/sidebar.php';
         $('#reportTable').DataTable({
             dom: 'Bfrtip',
             buttons: [
-                'excel', 'pdf', 'print'
-            ],
+                {
+                    extend: 'excel',
+                    footer: true
+                },
+                {
+                    extend: 'pdf',
+                    footer: true
+                },
+                {
+                    extend: 'print',
+                    footer: true
+                }
+            ]
         });
     });
 </script>

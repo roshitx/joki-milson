@@ -59,11 +59,12 @@ require __DIR__ . '/../../templates/sidebar.php';
                                     <img src="<?= BASE_URL ?>/img/dashboard/menu/<?= $menu['image'] ?>"
                                         class="card-img-top img-responsive" alt="...">
                                     <div class="card-body">
-                                        <h5 class="card-title"><?= $menu['title'] ?><small
-                                                class="text-danger"> x<?= $menu['quantity'] ?></small></h5>
+                                        <h5 class="card-title"><?= $menu['title'] ?><small class="text-danger">
+                                                x<?= $menu['quantity'] ?></small></h5>
                                         <?php if ($menu['show_discount']): ?>
                                         <h6 class="card-subtitle mb-2 text-muted"><s>Rp <?= $menu['price'] ?></s></h6>
-                                        <h6 class="card-subtitle mb-2 text-danger">Rp <?= number_format($menu['discounted_price'], 3, '.', ',') ?></h6>
+                                        <h6 class="card-subtitle mb-2 text-danger">Rp
+                                            <?= number_format($menu['discounted_price'], 3, '.', ',') ?></h6>
                                         <span class="badge badge-warning"><?= $menu['disc'] ?>% Diskon</span>
                                         <?php else: ?>
                                         <h6 class="card-subtitle mb-2 text-muted">Rp <?= $menu['price'] ?></h6>
@@ -83,21 +84,33 @@ require __DIR__ . '/../../templates/sidebar.php';
                             </div>
                             <?php } else { ?>
                             <div class="col-12">
-                                <h2 style="font-size: 20px;" class="mb-0">Total Pembayaran : <span class="text-danger"
-                                        style="font-weight: bold;">Rp
-                                        <?= $data['order_detail']['grand_total'] ?>,00</span></h2>
+                                <?php  
+                                $totalBelanja = $data['order_detail']['grand_total'];
+                                $totalPPN = $totalBelanja * 0.11;
+                                $grandTotal = $totalBelanja + $totalPPN;
+                                ?>
+                                <p class="m-0">Total Belanja : Rp <?= number_format($totalBelanja, 3, '.', ',') ?></p>
+                                <div class="ppn" hidden>
+                                    <p class="m-0">Tax PPN 11% : Rp <?= number_format($totalPPN, 3, '.', ',') ?></p>
+                                </div>
+                                <h2 style="font-size: 20px;" class="mb-0">Total Pembayaran :
+                                    <span class="text-danger total-payment" style="font-weight: bold;">Rp
+                                        <?= number_format($totalBelanja, 3, '.', ',') ?>,00</span></h2>
                                 <hr>
                                 <form action="<?= BASE_URL ?>/transaksi/store" method="post">
                                     <input type="hidden" value="<?= $data['order_detail']['order_id'] ?>"
                                         name="order_id">
-                                    <input type="hidden" value="<?= $data['order_detail']['grand_total'] ?>"
-                                        name="total_amount">
+                                    <input type="hidden" value="<?= $totalBelanja ?>" name="total_amount">
                                     <input type="hidden" value="<?= $_SESSION['name'] ?>" name="cashier_name">
+                                    <input type="hidden" name="grandtotal" id="grandtotal" value="<?= $totalBelanja ?>">
                                     <div class="d-flex justify-content-between">
                                         <div class="row">
                                             <div class="form-group">
-                                                <label for="payment_method">Metode Pembayaran :</label>
-                                                <select class="form-control" id="payment_method" name="payment_method">
+                                                <label for="payment_method">PPN & Metode Pembayaran</label>
+                                                <div class="mb-3">
+                                                    <input type="checkbox" name="ppn" id="ppn-switch" value="11">
+                                                </div>
+                                                <select class="form-control" id="payment_method" name="payment_method" required>
                                                     <option value="0" disabled selected>-- Pilih Metode Pembayaran --
                                                     </option>
                                                     <option value="cash">CASH</option>
@@ -137,5 +150,55 @@ require __DIR__ . '/../../templates/sidebar.php';
 </div>
 <!-- End of Content Wrapper -->
 <script>
+    $(document).ready(function () {
+        $("#ppn-switch").bootstrapSwitch({
+            onText: 'PPN 11%',
+            onColor: 'success'
+        });
+
+        $('#ppn-switch').on('switchChange.bootstrapSwitch', function (event, state) {
+            var totalBelanja = <?= $totalBelanja ?>;
+            var totalPPN = totalBelanja * 0.11;
+            var grandTotal = totalBelanja;
+
+            if (state) {
+                // Jika PPN diaktifkan
+                $('.ppn').attr('hidden', false);
+                grandTotal += totalPPN;
+            } else {
+                // Jika PPN dinonaktifkan
+                $('.ppn').attr('hidden', true);
+            }
+
+            // Update nilai grand total
+            $('.total-payment').text('Rp ' + number_format(grandTotal, 3, '.', ',') + ',00');
+            $('#grandtotal').val(number_format(grandTotal, 3, '.', ','));
+        });
+
+        // Fungsi untuk format number
+        function number_format(number, decimals, dec_point, thousands_sep) {
+            number = (number + '').replace(/[^0-9+\-Ee.]/g, '');
+            var n = !isFinite(+number) ? 0 : +number,
+                prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
+                sep = (typeof thousands_sep === 'undefined') ? '.' : thousands_sep,
+                dec = (typeof dec_point === 'undefined') ? ',' : dec_point,
+                s = '',
+                toFixedFix = function (n, prec) {
+                    var k = Math.pow(10, prec);
+                    return '' + (Math.round(n * k) / k).toFixed(prec);
+                };
+            // Fix for IE parseFloat(0.55).toFixed(0) = 0;
+            s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
+            if (s[0].length > 3) {
+                s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
+            }
+            if ((s[1] || '').length < prec) {
+                s[1] = s[1] || '';
+                s[1] += new Array(prec - s[1].length + 1).join('0');
+            }
+            return s.join(dec);
+        }
+    }); 
+    
     <?php Flasher::flash(); ?>
 </script>

@@ -40,6 +40,10 @@
     <!-- Select2 -->
     <link rel="stylesheet" href="<?= BASE_URL ?>/vendor/select2/dist/css/select2.min.css">
     <script src="<?= BASE_URL ?>/vendor/select2/dist/js/select2.min.js"></script>
+
+    <!-- SwitchMaster -->
+    <link rel="stylesheet" href="<?= BASE_URL ?>/vendor/bootstrap-switch-master/dist/css/bootstrap4/bootstrap-switch.css">
+    <script src="<?= BASE_URL ?>/vendor/bootstrap-switch-master/dist/js/bootstrap-switch.js"></script>
     <style>
         #customFile .custom-file-input:lang(en)::after {
             content: "Select file...";

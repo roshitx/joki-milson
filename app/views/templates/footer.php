@@ -17,8 +17,8 @@
           </footer>
 
           <!-- Javascript-->
-          <script src="<?= BASE_URL ?> /js/landing/core.min.js"></script>
-          <script src="<?= BASE_URL ?> /js/landing/script.js"></script>
+          <script src="<?= BASE_URL ?>/js/landing/core.min.js" type="text/javascript"></script>
+          <script src="<?= BASE_URL ?>/js/landing/script.js" type="text/javascript"></script>
           <!-- coded by Roshit-->
           </body>
 

@@ -179,7 +179,7 @@
             });
         });
 
-        $('.deleteButtonTable').click(function () {
+        $(document).on('click', '.deleteButtonTable', function () {
             let tableId = $(this).data('id');
             console.log(tableId);
             let deleteTableUrl = '<?= BASE_URL ?>/table/delete/' + tableId;

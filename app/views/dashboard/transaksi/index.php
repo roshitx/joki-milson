@@ -61,7 +61,15 @@ require __DIR__ . '/../../templates/sidebar.php';
                                             <?php } else { ?>
                                                 <span class="badge badge-success"><?= $order['status'] ?></span>
                                             <?php  } ?></td>
-                                        <td>Rp <?= $order['grand_total'] ?></td>
+                                        <td>
+                                            <?php  
+                                                if ($order['total_after_ppn'] !== null) {
+                                                    echo 'Rp ' . $order['total_after_ppn'];
+                                                } else {
+                                                    echo 'Rp ' . $order['grand_total'];
+                                                }
+                                            ?>
+                                        </td>
                                         <td>
                                             <a href="<?= BASE_URL ?>/transaksi/detail/<?= $order['order_id'] ?>"  id="detailOrder-<?= $order['order_id'] ?>" class="btn btn-info btn-circle btn-sm"
                                                 data-id="<?= $order['order_id'] ?>">

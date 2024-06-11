@@ -138,7 +138,7 @@ if (isset($_SESSION['cart_item_count'])) {
                                 </div>
                                 <div class="col-6">
                                     <label for="table_number">Table Number</label>
-                                    <input type="number" class="form-control" placeholder="Nomor Meja" id="table_number" name="table_number" value="<?= $data['nomor_meja'] ?>" readonly>
+                                    <input type="number" class="form-control" placeholder="Nomor Meja" id="table_number" name="table_number" readonly>
                                     <input type="number" class="form-control" id="uuid_table" name="uuid_table" value="<?= $data['uuid_table'] ?>" hidden>
                                 </div>
                             </div>
@@ -191,6 +191,25 @@ if (isset($_SESSION['cart_item_count'])) {
 </div>
 <script>
     $(document).ready(function() {
+        let tableNumber = getNomorMeja();
+
+        $.ajax({
+            url: 'http://localhost/milson-coffee/public/table/gettablebyuuid/' + tableNumber,
+            method: 'GET',
+            dataType: 'json',
+            success: function(res) {
+                console.log(res.nomor_meja);
+                if (res != null) {
+                    $('#table_number').val(res.nomor_meja);
+                } else {
+                    console.log("Meja tidak ditemukan");
+                }
+            },
+            error: function(error) {
+                console.error(error);
+            }
+        });
+        
         $('#filterByKategori').change(function() {
             const selectedCategory = $(this).val();
             const tableNumber = $('#table_number').val();
@@ -479,6 +498,11 @@ if (isset($_SESSION['cart_item_count'])) {
                     console.log(error);
                 }
             });
+        }
+
+        function getNomorMeja() {
+            let url = $(location).attr("href");
+            return url.split("/").pop();
         }
 
         function formatCurrency(value) {

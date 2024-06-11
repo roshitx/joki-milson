@@ -11,6 +11,12 @@ class Table extends Controller
         $this->view('templates/dash_footer');
     }
 
+    public function gettablebyuuid($uuid)
+    {
+        $data = $this->model('Table_model')->getTableByUuid($uuid);
+        echo json_encode($data);
+    }
+
     public function getNomorMeja()
     {
         $result = $this->model('Table_model')->getLastId();

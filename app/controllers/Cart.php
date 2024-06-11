@@ -41,8 +41,8 @@ class Cart extends Controller
         $cartItemCount = $this->model('Cart_model')->getCartItemCount();
         $_SESSION['cart_item_count'] = $cartItemCount;
     
-        // Redirect ke halaman orders
-        header('Location:' . ($referer ? $referer : BASE_URL . '/orders'));
+        // Redirect ke halaman home
+        header('Location:' . ($referer ? $referer : BASE_URL . '/home'));
         exit;
     }
 

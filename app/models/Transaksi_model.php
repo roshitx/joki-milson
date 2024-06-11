@@ -14,16 +14,22 @@ class Transaksi_model
     {
         $status = 'Selesai';
         $transactionId = 'TRN-' . substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 7);
-
-        $query = "INSERT INTO transactions (transaction_id, order_id, payment_method, total_amount, cashier_name) VALUES (:transaction_id, :order_id, :payment_method, :total_amount, :cashier_name)";
+    
+        $ppn = isset($data['ppn']) ? $data['ppn'] : null;
+        $grandtotal = isset($data['grandtotal']) ? $data['grandtotal'] : null;
+    
+        $query = "INSERT INTO transactions (transaction_id, order_id, payment_method, total_amount, cashier_name, ppn, grandtotal) 
+                  VALUES (:transaction_id, :order_id, :payment_method, :total_amount, :cashier_name, :ppn, :grandtotal)";
         $this->db->query($query);
-
+    
         $this->db->bind(':transaction_id', $transactionId);
         $this->db->bind(':order_id', $data['order_id']);
         $this->db->bind(':payment_method', $data['payment_method']);
         $this->db->bind(':total_amount', $data['total_amount']);
         $this->db->bind(':cashier_name', $data['cashier_name']);
-
+        $this->db->bind(':ppn', $ppn);
+        $this->db->bind(':grandtotal', $grandtotal);
+    
         $this->db->execute();
         
         $this->db->query("UPDATE orders SET status = :status WHERE order_id = :order_id");
@@ -31,8 +37,15 @@ class Transaksi_model
         $this->db->bind(':order_id', $data['order_id']);
         $this->db->execute();
 
+        if ($ppn !== null) {
+            $this->db->query("UPDATE orders SET total_after_ppn = :grandtotal WHERE order_id = :order_id");
+            $this->db->bind(':grandtotal', $grandtotal); // Bind grandtotal ke kolom total_after_ppn
+            $this->db->bind(':order_id', $data['order_id']);
+            $this->db->execute();
+        }
+    
         return $this->db->rowCount();
-    }
+    }    
 
     public function getDataById($orderId)
     {

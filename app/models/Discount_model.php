@@ -66,7 +66,7 @@ class Discount_Model
 
     public function getDiscountByMenuId($menu_id)
     {
-        $this->db->query("SELECT * FROM discount WHERE menu_id = :menu_id");
+        $this->db->query("SELECT * FROM discount WHERE menu_id = :menu_id AND end_date >= CURDATE()");
         $this->db->bind('menu_id', $menu_id);
         $result = $this->db->single();
 

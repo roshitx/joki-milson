@@ -266,3 +266,6 @@
     </div>
   </section>
 </div>
+<script>
+  <?php Flasher::flash(); ?>
+</script>

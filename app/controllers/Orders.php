@@ -5,28 +5,37 @@
         // menu models
         public function index($uniqueId = null)
         {
-            if ($uniqueId !== null) {
-                $tableData = $this->model('Table_model')->getTableByUuId($uniqueId);
-
-                $data['nomor_meja'] = $tableData['nomor_meja'];
-                $data['uuid_table'] = $tableData['uuid'];
-                // echo "<pre>";
-                // var_dump($nomorMeja);
-                // echo "</pre>";
-                // die;
-            }
-
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['review'])) {
                 $rating = $_POST['rating'];
                 $review = $_POST['review'];
                 $ordersModel = $this->model('Orders_model');
                 $ordersModel->addReview($rating, $review);
+                Flasher::setFlash('Success', 'Berhasil mengirim review dan rating', 'success');
+                header('Location:' . BASE_URL . '/home');
+                exit;
             }
-
+        
+            if ($uniqueId !== null) {
+                $tableData = $this->model('Table_model')->getTableByUuId($uniqueId);
+        
+                if ($tableData === false) {
+                    Flasher::setFlash('Upss..', 'Kode meja tidak tersedia, mohon coba lagi.', 'error');
+                    header('Location:' . BASE_URL . '/home');
+                    exit;
+                } else {
+                    $data['nomor_meja'] = $tableData['nomor_meja'];
+                    $data['uuid_table'] = $tableData['uuid'];
+                }
+            } else {
+                Flasher::setFlash('Upss..', 'Mohon scan QR Code yang tersedia di meja.', 'error');
+                header('Location:' . BASE_URL . '/home');
+                exit;
+            }
+        
             // Get all menus
             $data['judul'] = 'Milson Coffee | Semua Menu';
             $data['menus'] = $this->model('Orders_model')->getAllMenus();
-
+        
             // Apply discount logic
             foreach ($data['menus'] as &$menu) {
                 if (
@@ -39,12 +48,13 @@
                     $menu['show_discount'] = false;
                 }
             }
-
+        
             // Load views
             $this->view('templates/header', $data);
             $this->view('home/menus/index', $data);
             $this->view('templates/footer');
         }
+        
 
         public function menuByCategory($category)
         {

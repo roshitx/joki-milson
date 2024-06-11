@@ -254,7 +254,5 @@
                 console.error("Kesalahan dalam permintaan Ajax: " + error);
             }
         });
-
-
     });
 </script>
